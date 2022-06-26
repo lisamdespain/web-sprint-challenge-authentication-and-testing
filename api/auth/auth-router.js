@@ -3,7 +3,7 @@ const { BCRYPT_ROUNDS, JWT_SECRET } = require("../../secrets");
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('./users-model'); 
-
+const {checkInput} = require('../middleware/restricted');
 // router.post('/register', (req, res) => {
     /*
     IMPLEMENT
@@ -30,13 +30,10 @@ const Users = require('./users-model');
     4- On FAILED registration due to the `username` being taken,
       the response body should include a string exactly as follows: "username taken".
   */
- router.post('/register', async(req, res, next) =>{
+ router.post('/register', checkInput, async(req, res, next) =>{
   const {username, password} = req.body;
   const result = await Users.findBy({username});
-  if (!username || !password){
-    res.status(400).json({message: "username and password required"});
-    return;
-  } else if (result){
+   if (result){
     res.status(400).json({message: "username taken"});
     return;
   } else {
@@ -47,9 +44,7 @@ const Users = require('./users-model');
     }).catch(next);
   }
  });
-
-router.post('/login', (req, res) => {
-  res.end('implement login, please!');
+  
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -73,23 +68,23 @@ router.post('/login', (req, res) => {
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
- const {username, password} = req.body;
- if (!username || !password) {
-  res.status(400).json({message: "username and password required"})
-} else {
+router.post('/login', checkInput, (req, res) => {
+  const {username, password} = req.body;
   Users.findBy({username})
-  .then(user =>{
-    if (user.username){
-      if (bcryptjs.compareSync(req.body.password, user.password)){
-        const token = generateToken(user);
-        res.status(200).json({message: `welcome, ${req.username}`, token})
+    .then(user =>{
+      if (user){
+        if (bcryptjs.compareSync(password, user.password)){
+          const token = generateToken(user);
+          res.status(200).json({message: `welcome, ${user.username}`, token})
+          return;
+      } else {
+        res.status(400).json({message: "invalid credentials"})
+        return;
       }
-    } else {
-      res.status(401).json({message: 'invalid credentials'})
     }
-  })
-}
-});
+      })
+  }
+)
 
 function generateToken(user){
   const payload ={

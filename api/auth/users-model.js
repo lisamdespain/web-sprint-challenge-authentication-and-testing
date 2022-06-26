@@ -5,7 +5,7 @@ function findById(id){
 }
 
 function findBy(input){
-    return db('users').where(input).select('username').first();
+    return db('users').where(input).first();
 }
 
 async function add(user) {
