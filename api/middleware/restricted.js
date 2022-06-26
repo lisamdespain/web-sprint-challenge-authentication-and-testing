@@ -15,6 +15,20 @@ function restrict (req, res, next)  {
     3- On invalid or expired token in the Authorization header,
       the response body should include a string exactly as follows: "token invalid".
   */
+ const token = req.headers.authorization;
+ if (token == null){
+  res.status(401).json({message: "token required"})
+  return;
+ }
+ jwt.verify(token, JWT_SECRET, (err, decoded) =>{
+  if (err){
+    res.status(401).json({mesage: "token invalid"});
+    return;
+  } else{
+    req.decoded = decoded;
+    next();
+  }
+ })
 }
 
 function checkInput (req,res,next) {
@@ -25,7 +39,21 @@ function checkInput (req,res,next) {
 }
 }
 
+function checkUsername(req, res, next){
+  const {username} = req.body;
+  Users.findBy({username})
+  .then(user =>{
+    if (!user){
+      res.status(400).json({message: "invalid credentials"})
+      return;
+    }
+    req.user = user;
+    next();
+  })
+}
+
 module.exports = {
   restrict,
   checkInput,
+  checkUsername
 }

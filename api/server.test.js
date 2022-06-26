@@ -76,6 +76,8 @@ describe('jokes endpoint testing', () =>{
   })
 
   test('[9] CAN get jokes when logged in', async () =>{
+    await request(server).post('/api/auth/register').send(user1);
+    await request(server).post('/api/auth/login').send(user1);
     let result = await request(server).get('/api/jokes');
         expect(result.statusCode).toBe(200);
         expect(result.body).toBeInstanceOf(Array);

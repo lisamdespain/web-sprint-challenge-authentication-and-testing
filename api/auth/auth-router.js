@@ -3,7 +3,7 @@ const { BCRYPT_ROUNDS, JWT_SECRET } = require("../../secrets");
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Users = require('./users-model'); 
-const {checkInput} = require('../middleware/restricted');
+const {checkInput, checkUsername} = require('../middleware/restricted');
 // router.post('/register', (req, res) => {
     /*
     IMPLEMENT
@@ -68,23 +68,17 @@ const {checkInput} = require('../middleware/restricted');
     4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
       the response body should include a string exactly as follows: "invalid credentials".
   */
-router.post('/login', checkInput, (req, res) => {
-  const {username, password} = req.body;
-  Users.findBy({username})
-    .then(user =>{
-      if (user){
-        if (bcryptjs.compareSync(password, user.password)){
-          const token = generateToken(user);
-          res.status(200).json({message: `welcome, ${user.username}`, token})
+router.post('/login', checkInput, checkUsername, (req, res) => {
+     if (bcryptjs.compareSync(req.body.password, req.user.password)){
+          const token = generateToken(req.user);
+          res.status(200).json({message: `welcome, ${req.user.username}`, token})
           return;
       } else {
         res.status(400).json({message: "invalid credentials"})
         return;
       }
     }
-      })
-  }
-)
+      )
 
 function generateToken(user){
   const payload ={
