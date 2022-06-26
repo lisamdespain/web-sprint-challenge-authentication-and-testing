@@ -72,7 +72,7 @@ describe('jokes endpoint testing', () =>{
   test('[8] can NOT get jokes when not logged in', async () =>{
     let result = await request(server).get('/api/jokes');
         expect(result.statusCode).toBe(400);
-        expect(result.body).toBe({message: 'token required'});
+        expect(result.body).toEqual({message: 'token required'});
   })
 
   test('[9] CAN get jokes when logged in', async () =>{

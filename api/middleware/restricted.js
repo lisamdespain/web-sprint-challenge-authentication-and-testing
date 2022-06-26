@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const Users = require('../auth/users-model');
 
 function restrict (req, res, next)  {
-  next();
+ 
   /*
     IMPLEMENT
 
@@ -16,19 +16,21 @@ function restrict (req, res, next)  {
       the response body should include a string exactly as follows: "token invalid".
   */
  const token = req.headers.authorization;
+ 
  if (token == null){
-  res.status(401).json({message: "token required"})
+  res.status(400).json({message: "token required"})
   return;
  }
  jwt.verify(token, JWT_SECRET, (err, decoded) =>{
   if (err){
-    res.status(401).json({mesage: "token invalid"});
+    res.status(401).json({message: 'Token invalid'});
     return;
-  } else{
-    req.decoded = decoded;
-    next();
   }
- })
+  else {
+  req.decoded = decoded;
+  next();
+  }
+})
 }
 
 function checkInput (req,res,next) {
