@@ -77,10 +77,10 @@ describe('jokes endpoint testing', () =>{
 
   test('[9] CAN get jokes when logged in', async () =>{
     await request(server).post('/api/auth/register').send(user1);
-    await request(server).post('/api/auth/login').send(user1);
-    let result = await request(server).get('/api/jokes');
-        expect(result.statusCode).toBe(200);
-        expect(result.body).toBeInstanceOf(Array);
-        expect(result.body).toHaveLength(3);
+    let res = await request(server).post('/api/auth/login').send(user1);
+    res = await request(server).get('/api/jokes').set('Authorization', res.body.token)
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toBeInstanceOf(Array);
+        expect(res.body).toHaveLength(3);
   })
 })
